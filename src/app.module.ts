@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BullModule } from '@nestjs/bullmq';
 import { FlashQueueController } from './controllers/flash-queue/flash-queue.controller';
-import { FlashQueueService } from './controllers/flash-queue/flash-queue.service';
+import { FlashQueueService } from './services/flash-queue/flash-queue.service';
 import { FlashQueueWorker } from './worker/flash-queue.worker';
 import { FlashQueueEventsListener } from './worker/flash-queue.events';
 import { BlockchainService } from './services/blockchain/blockchain.service';

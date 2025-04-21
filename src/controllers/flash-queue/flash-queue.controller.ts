@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
-import { FlashQueueService } from './flash-queue.service';
+import { FlashQueueService } from '../../services/flash-queue/flash-queue.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 
