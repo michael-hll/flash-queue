@@ -10,13 +10,13 @@ import { FlashQueueEventsListener } from './worker/flash-queue.events';
 import { BlockchainService } from './services/blockchain/blockchain.service';
 import appConfig from './config/app.config';
 import blockchainConfig from './config/blockchain.config';
-import secretsConfig from './config/secrets.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, blockchainConfig, secretsConfig],
+      load: [appConfig, blockchainConfig],
+      envFilePath: '.env',
     }),
     BullModule.forRoot({
       connection: {

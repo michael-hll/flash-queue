@@ -21,8 +21,8 @@ export class BlockchainService {
       `blockchain.${network}.rpcUrl`,
     );
 
-    const privateKey = this.configService.get<string>('secrets.privateKey');
-    this.logger.log(`Private key available: ${!!privateKey}`);
+    const privateKey = this.configService.get<string>('PRIVATE_KEY');
+    this.logger.verbose(`Private key available: ${!!privateKey}`);
     const flashSwapAddress = this.configService.get<string>(
       `blockchain.${network}.contracts.flashSwap`,
     );
