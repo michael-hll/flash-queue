@@ -24,7 +24,7 @@ import blockchainConfig from './config/blockchain.config';
         port: 6379,
       },
       defaultJobOptions: {
-        attempts: 2,
+        attempts: 1,
         removeOnComplete: 100,
         removeOnFail: 100,
         //backoff: 1, // delay in ms

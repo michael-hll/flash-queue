@@ -5,6 +5,7 @@ import { FlashSwap } from 'src/typechain-types-copy/contracts/FlashSwap';
 import { FlashSwap__factory } from 'src/typechain-types-copy/factories/contracts/FlashSwap__factory';
 import safeStringify from 'fast-safe-stringify';
 import { Logger } from '@nestjs/common';
+import { StartArbitrageArgs } from 'src/common/types/blockchain.types';
 
 @Injectable()
 export class BlockchainService {
@@ -45,14 +46,7 @@ export class BlockchainService {
       });
   }
 
-  async startTriangleArbitrage(
-    token0: string,
-    borrowAmount: bigint,
-    token1: string,
-    token2: string,
-    deadLineMin: number,
-    slippages: number[],
-  ) {
+  async startTriangleArbitrage(args: StartArbitrageArgs) {
     try {
       const feeData = await this.provider.getFeeData();
       const gasPrice = feeData.gasPrice;
@@ -71,31 +65,49 @@ export class BlockchainService {
         this.configService.get<number>('blockchain.bsc.defaultGasLimit') ??
         3_000_000;
 
-      const tx = await this.flashSwapContract.start(
-        token0,
-        borrowAmount,
-        token1,
-        token2,
-        deadLineMin,
-        slippages,
-        {
-          gasPrice: adjustedGasPrice,
-          gasLimit: BigInt(defaultGasLimit),
-        },
-      );
+      try {
+        await this.flashSwapContract.start.staticCall(
+          args.token0,
+          args.borrowAmount,
+          args.token1,
+          args.token2,
+          args.deadLineMin,
+          args.slippages,
+        );
 
-      const receipt = await tx.wait();
+        // If static call succeeds, proceed with the actual transaction
+      } catch (error) {
+        this.logger.error(`failed: ${error.message}`);
+        throw error;
+      }
 
-      return {
-        success: receipt?.status === 1,
-        txHash: receipt?.hash || tx.hash,
-        gasUsed: receipt?.gasUsed?.toString() || '0',
-        effectiveGasPrice: receipt?.gasPrice?.toString() || '0',
-        timestamp: new Date().toISOString(),
-        path: `${token0} -> ${token1} -> ${token2}`,
-        tx: safeStringify(tx),
-        receipt: safeStringify(receipt),
-      };
+      return { message: 'is in testing.' };
+
+      // const tx = await this.flashSwapContract.start(
+      //   args.token0,
+      //   args.borrowAmount,
+      //   args.token1,
+      //   args.token2,
+      //   args.deadLineMin,
+      //   args.slippages,
+      //   {
+      //     gasPrice: adjustedGasPrice,
+      //     gasLimit: BigInt(defaultGasLimit),
+      //   },
+      // );
+
+      // const receipt = await tx.wait();
+
+      // return {
+      //   success: receipt?.status === 1,
+      //   txHash: receipt?.hash || tx.hash,
+      //   gasUsed: receipt?.gasUsed?.toString() || '0',
+      //   effectiveGasPrice: receipt?.gasPrice?.toString() || '0',
+      //   timestamp: new Date().toISOString(),
+      //   path: `${args.token0} -> ${args.token1} -> ${args.token2}`,
+      //   tx: safeStringify(tx),
+      //   receipt: safeStringify(receipt),
+      // };
     } catch (error) {
       console.error('Flash loan execution failed:', error);
       throw error;

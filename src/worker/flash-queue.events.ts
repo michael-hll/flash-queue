@@ -11,6 +11,6 @@ export class FlashQueueEventsListener extends QueueEventsHost {
 
   @OnQueueEvent('added')
   onAdded(job: { jobId: string; name: string }) {
-    this.logger.log(`Job added: ${job.jobId} - ${job.name}`);
+    this.logger.debug(`Job added: ${job.jobId} - ${job.name}`);
   }
 }
