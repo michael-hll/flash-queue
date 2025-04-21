@@ -6,6 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "copy:typechain": "./src/scripts/copy-typechain-types.sh",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -26,6 +27,8 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "bullmq": "^5.49.1",
+    "ethers": "^6.13.5",
+    "fast-safe-stringify": "^2.1.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },

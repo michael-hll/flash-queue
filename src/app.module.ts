@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BullModule } from '@nestjs/bullmq';
@@ -6,9 +7,17 @@ import { FlashQueueController } from './controllers/flash-queue/flash-queue.cont
 import { FlashQueueService } from './controllers/flash-queue/flash-queue.service';
 import { FlashQueueWorker } from './worker/flash-queue.worker';
 import { FlashQueueEventsListener } from './worker/flash-queue.events';
+import { BlockchainService } from './services/blockchain/blockchain.service';
+import appConfig from './config/app.config';
+import blockchainConfig from './config/blockchain.config';
+import secretsConfig from './config/secrets.config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [appConfig, blockchainConfig, secretsConfig],
+    }),
     BullModule.forRoot({
       connection: {
         host: 'localhost',
@@ -31,6 +40,7 @@ import { FlashQueueEventsListener } from './worker/flash-queue.events';
     FlashQueueService,
     FlashQueueWorker,
     FlashQueueEventsListener,
+    BlockchainService,
   ],
 })
 export class AppModule {}

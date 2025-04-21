@@ -42,6 +42,9 @@ lerna-debug.log*
 .env.production.local
 .env.local
 
+# securities
+*secrets*.ts
+
 # temp directory
 .temp
 .tmp
