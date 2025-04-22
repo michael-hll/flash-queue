@@ -1,6 +1,6 @@
 export default () => ({
   blockchain: {
-    network: 'bsc_testnet',
+    network: 'bsc',
     bsc: {
       rpcUrl: 'https://bsc-dataseed.binance.org/',
       chainId: 56,

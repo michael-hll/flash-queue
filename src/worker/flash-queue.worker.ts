@@ -21,9 +21,23 @@ export class FlashQueueWorker extends WorkerHost {
 
   async process(job: Job) {
     switch (job.name) {
-      case 'path':
+      case 'flash':
         await this.startArbitrage(job);
         break;
+      case 'flash-test': {
+        const args = job.data as StartArbitrageArgs;
+        if (!this.isValidFlashJobData(args)) {
+          this.logger.error(`Invalid job data: ${safeStringify(args)}`);
+          throw new Error('Invalid job data: ' + safeStringify(args));
+        }
+        this.logger.debug(
+          `Job ${job.id} is a test job!, data: ${safeStringify(args)}`,
+        );
+        const result =
+          await this.blockchainService.startTriangleArbitrage(args);
+        this.logger.debug(`Job ${job.id} result: ${safeStringify(result)}`);
+        break;
+      }
       default:
         this.logger.debug(`Unknow job id: ${job.id}, name: ${job.name}`);
         break;
@@ -31,14 +45,12 @@ export class FlashQueueWorker extends WorkerHost {
   }
 
   async startArbitrage(job: Job) {
-    const args: StartArbitrageArgs = {
-      token0: '0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7',
-      borrowAmount: 35555n,
-      token1: '0xFa60D973F7642B748046464e165A65B7323b0DEE',
-      token2: '0x7ef95a0FEE0Dd31b22626fA2e10Ee6A223F8a684',
-      deadLineMin: 0,
-      slippages: [997, 997, 997],
-    };
+    const args = job.data as StartArbitrageArgs;
+    if (!this.isValidFlashJobData(args)) {
+      this.logger.error(`Invalid job data: ${safeStringify(args)}`);
+      throw new Error('Invalid job data: ' + safeStringify(args));
+    }
+    this.logger.debug(`Job ${job.id}!, data: ${safeStringify(args)}`);
     const result = await this.blockchainService.startTriangleArbitrage(args);
     this.logger.debug(`Job ${job.id} result: ${safeStringify(result)}`);
   }
@@ -66,5 +78,17 @@ export class FlashQueueWorker extends WorkerHost {
   @OnWorkerEvent('progress')
   onProgress(job: Job, progress: number) {
     this.logger.debug(`Job ${job.id} progress: ${progress}%`);
+  }
+  private isValidFlashJobData(
+    data: StartArbitrageArgs,
+  ): data is StartArbitrageArgs {
+    return (
+      data &&
+      typeof data.token0 === 'string' &&
+      typeof data.borrowAmount === 'string' &&
+      typeof data.token1 === 'string' &&
+      typeof data.token2 === 'string' &&
+      Array.isArray(data.slippages)
+    );
   }
 }
