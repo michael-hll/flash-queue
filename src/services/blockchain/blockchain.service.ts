@@ -22,11 +22,9 @@ export class BlockchainService {
   private flashSwapContract: FlashSwap;
   private logger = new Logger(BlockchainService.name);
 
-  // Add a nonce tracking mechanism
   private lastNonce: number = -1;
   private noncelock = new AsyncLock();
 
-  // Add this method to safely get an incremented nonce
   private async getNextNonce(): Promise<number> {
     return this.noncelock.acquire('nonce', async () => {
       if (this.lastNonce === -1) {
@@ -43,14 +41,13 @@ export class BlockchainService {
   private async resetNonce(): Promise<number> {
     return this.noncelock.acquire('nonce', async () => {
       try {
-        const networkNonce = await this.wallet.getNonce('pending');
-        if (this.lastNonce !== networkNonce) {
-          this.logger.debug(
-            `Nonce reset from ${this.lastNonce} to ${networkNonce}`,
-          );
-        }
-        this.lastNonce = networkNonce;
-        return this.lastNonce;
+        // Simply reset to -1 to force a network fetch on next getNextNonce() call
+        const oldNonce = this.lastNonce;
+        this.lastNonce = -1;
+        this.logger.debug(
+          `Nonce tracking reset from ${oldNonce} to be refreshed on next use`,
+        );
+        return -1; // Indicates we've reset but don't have a new value yet
       } catch (error) {
         this.logger.error(`Failed to reset nonce: ${error.message}`);
         throw error;
@@ -74,7 +71,6 @@ export class BlockchainService {
     this.provider = new JsonRpcProvider(rpcUrl as string);
     this.wallet = new Wallet(privateKey!, this.provider);
 
-    // Connect using the factory
     this.flashSwapContract = FlashSwap__factory.connect(
       flashSwapAddress!,
       this.wallet,
@@ -95,7 +91,7 @@ export class BlockchainService {
       const gasPrice = feeData.gasPrice;
 
       if (!gasPrice) {
-        throw new Error('Failed to get gas price');
+        throw new Error('Failed to get gas price from the fee data.');
       }
 
       const gasMultiplier =
@@ -108,7 +104,6 @@ export class BlockchainService {
         this.configService.get<number>('blockchain.bsc.defaultGasLimit') ??
         3_000_000;
 
-      // If static call succeeded, send actual transaction
       try {
         const nonce = await this.getNextNonce();
         this.logger.debug(`Using nonce ${nonce} for transaction`);

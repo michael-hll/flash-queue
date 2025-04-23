@@ -79,6 +79,7 @@ export class FlashQueueWorker extends WorkerHost {
   onProgress(job: Job, progress: number) {
     this.logger.debug(`Job ${job.id} progress: ${progress}%`);
   }
+
   private isValidFlashJobData(
     data: StartArbitrageArgs,
   ): data is StartArbitrageArgs {

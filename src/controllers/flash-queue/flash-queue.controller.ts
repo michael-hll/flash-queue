@@ -19,9 +19,9 @@ export class FlashQueueController {
   async addPath(@Body() body: { percent: number }) {
     const priority = Math.floor(-body.percent * 1000);
     await this.flashQueue.add(
-      'path',
+      'flash_test',
       {
-        name: 'flash',
+        name: 'test',
         data: {
           age: 25,
           date: new Date(),
